@@ -20,22 +20,19 @@ class SiteFactory(factory.django.DjangoModelFactory):
     class Meta(object):
         model = Site
 
-    domain = factory.LazyAttribute(lambda o: 'domain{}.com'.format(o))
-    name = factory.LazyAttribute(lambda o: 'name{}'.format(o))
-
 
 class CertificateTemplateFactory(factory.django.DjangoModelFactory):
     class Meta(object):
         model = models.CertificateTemplate
 
-    name = factory.Sequence(lambda n: 'template{}'.format(n))
-    content = factory.LazyAttribute(lambda o: '<html>{}</html>'.format(o))
+    name = factory.Sequence(lambda n: 'template%d' % n)
+    content = '<html></html>'
 
 
 class SiteCertificateTemplateBaseFactory(factory.django.DjangoModelFactory):
     site = factory.SubFactory(SiteFactory)
     template = factory.SubFactory(CertificateTemplateFactory)
-    title = factory.LazyAttribute(lambda o: 'title{}'.format(o))
+    title = 'dummy title'
 
 
 class ProgramCertificateFactory(SiteCertificateTemplateBaseFactory):
@@ -49,7 +46,7 @@ class CourseCertificateFactory(SiteCertificateTemplateBaseFactory):
     class Meta(object):
         model = models.CourseCertificate
 
-    course_id = factory.LazyAttribute(lambda o: 'course{}'.format(o))
+    course_id = factory.Sequence(lambda o: 'course-%d' % o)
     certificate_type = constants.CertificateType.HONOR
 
 
@@ -58,9 +55,9 @@ class UserCredentialFactory(factory.django.DjangoModelFactory):
         model = models.UserCredential
 
     credential = factory.SubFactory(ProgramCertificateFactory)
-    username = factory.Sequence(lambda o: 'user{}'.format(o))
+    username = factory.Sequence(lambda o: 'robot%d' % o)
     status = models.UserCredential.AWARDED
-    download_url = factory.LazyAttribute(lambda o: u'http://www.google{0}.com'.format(o))
+    download_url = 'http://www.google.com'
     uuid = factory.LazyAttribute(lambda o: uuid.uuid4())  # pylint: disable=undefined-variable
 
 
@@ -69,14 +66,14 @@ class UserCredentialAttributeFactory(factory.django.DjangoModelFactory):
         model = models.UserCredentialAttribute
 
     user_credential = factory.SubFactory(UserCredentialFactory)
-    namespace = factory.LazyAttribute(lambda o: 'whitelabel{}'.format(o))
-    name = factory.LazyAttribute(lambda o: 'name{}'.format(o))
-    value = factory.LazyAttribute(lambda o: 'value{}'.format(o))
+    namespace = factory.Sequence(lambda o: u'namespace-%d' % o)
+    name = factory.Sequence(lambda o: u'name-%d' % o)
+    value = factory.Sequence(lambda o: u'value-%d' % o)
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    username = factory.Sequence(lambda o: 'robot{}'.format(o))
-    email = factory.Sequence(lambda o: u'robot+test+{0}@edx.org'.format(o))
+    username = factory.Sequence(lambda o: 'robot%d' % o)
+    email = factory.LazyAttribute(lambda obj: '%s@edx.org' % obj.username)
     first_name = 'robot'
     last_name = 'user'
     password = factory.PostGenerationMethodCall('set_password', PASSWORD)

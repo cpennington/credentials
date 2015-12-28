@@ -452,6 +452,27 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
         expected_data = self._create_output_data(users_creds[0], program_2)
         self.assertEqual(json.loads(response.content), expected_data)
 
+    def test_with_invalid_course_id(self):
+        """ Verify that create endpoint returns 400-Bad Request if course-id is not a valid
+        string.
+        """
+
+        data = {
+            "username": "user1",
+            "course_id": "1234",
+            "attributes": [
+                {
+                    "namespace": self.attr.namespace,
+                    "name": self.attr.name,
+                    "value": self.attr.value
+                }
+            ]
+        }
+
+        response = self._attempt_create_user_credentials(data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content), {"error": "Course Id [1234] is invalid."})
+
 
 class TestAPITransactions(AuthClientMixin, APITransactionTestCase):
     """
