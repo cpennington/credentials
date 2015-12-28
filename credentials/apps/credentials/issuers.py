@@ -56,7 +56,7 @@ class ProgramCertificateIssuer(AbstractCredentialIssuer):
     issued_credential_type = ProgramCertificate
 
     @transaction.atomic
-    def issue_credential(self, username, program_id, attributes):
+    def issue_credential(self, username, program_id, attributes):  # pylint: disable=arguments-differ
 
         program_certificate = ProgramCertificate.objects.get(program_id=program_id)
 
