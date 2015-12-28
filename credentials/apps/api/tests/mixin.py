@@ -1,13 +1,14 @@
 """Mixin class for authentication."""
 from django.contrib.auth.models import Permission
+from rest_framework.test import APITestCase
 
 from credentials.apps.api.tests.factories import UserFactory
 
 
-class AuthClientMixin(object):
+class AuthClientMixin(object, APITestCase):
     """Mixin useful for getting APIClient objects in tests."""
 
-    def get_api_client(self, client, permission_code=None):
+    def get_api_client(self, permission_code=None):
         """
         Helper for concisely obtaining a `rest_framework.test.APIClient` instance,
         authenticated with a user having specific model level permissions.
@@ -23,6 +24,6 @@ class AuthClientMixin(object):
         if permission_code:
             # pylint: disable=maybe-no-member
             user.user_permissions.add(Permission.objects.get(codename=permission_code))
-            client.force_authenticate(user)
+            self.client.force_authenticate(user)
 
-        return client
+        return self.client
