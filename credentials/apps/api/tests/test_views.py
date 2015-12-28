@@ -13,8 +13,8 @@ from testfixtures import LogCapture
 from credentials.apps.api.tests.mixin import AuthClientMixin
 from credentials.apps.api.tests.factories import (
     CourseCertificateFactory, ProgramCertificateFactory,
-    UserCredentialFactory, UserCredentialAttributeFactory
-)
+    UserCredentialFactory, UserCredentialAttributeFactory,
+    UserFactory)
 from credentials.apps.credentials.constants import DRF_DATE_FORMAT
 from credentials.apps.credentials.models import UserCredential, UserCredentialAttribute
 
@@ -30,7 +30,8 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
         super(TestGenerateProgramsCredentialView, self).setUp()
 
         # api client with no permissions
-        self.client = self.get_api_client(permission_code=None)
+        self.user = UserFactory.create()
+        self.client = self.get_api_client(self.user, permission_code=None)
 
         # create credentials for user
         self.program_cert = ProgramCertificateFactory.create()
@@ -82,7 +83,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
           Response: HTTP response from the API.
         """
         # get client with user has permission to change user credential
-        client = self.get_api_client(permission_code="change_usercredential")
+        client = self.get_api_client(self.user, permission_code="change_usercredential")
         path = reverse("credentials:v1:usercredential-detail", args=[self.user_credential.id])
         return client.patch(path=path, data=json.dumps(data), content_type=JSON_CONTENT_TYPE)
 
@@ -152,7 +153,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
           Response: HTTP response from the API.
         """
         # get client with user has permission to add user credential
-        client = self.get_api_client(permission_code="add_usercredential")
+        client = self.get_api_client(self.user, permission_code="add_usercredential")
         path = reverse("credentials:v1:usercredential-list")
         return client.post(path=path, data=json.dumps(data), content_type=JSON_CONTENT_TYPE)
 
@@ -441,7 +442,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
                 }
             ]
         }
-        client = self.get_api_client(permission_code="add_usercredential")
+        client = self.get_api_client(self.user, permission_code="add_usercredential")
 
         with self.assertNumQueries(12):
             path = reverse("credentials:v1:usercredential-list")

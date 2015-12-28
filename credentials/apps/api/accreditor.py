@@ -31,7 +31,7 @@ class Accreditor(object):
             else:
                 logger.warning(
                     "The issuer [%s] is already registered to issue credentials of type [%s]. [%s] will NOT be used.",
-                    registered_issuer, credential_type_slug, issuer)
+                    registered_issuer.__class__, credential_type_slug, issuer.__class__)
 
     def issue_credential(self, credential_type, username, **kwargs):
         """Issues a credential.

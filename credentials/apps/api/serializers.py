@@ -18,17 +18,18 @@ class CredentialRelatedField(serializers.RelatedField):  # pylint: disable=abstr
         """
         Serialize objects to a according to model content-type.
         """
+        credential = {
+            'credential_id': value.id
+        }
         if isinstance(value, ProgramCertificate):
-            return {
+            return credential.update({
                 'program_id': value.program_id,
-                'credential_id': value.id
-            }
+            })
         elif isinstance(value, CourseCertificate):
-            return {
+            return credential.update({
                 'course_id': value.course_id,
-                'credential_id': value.id,
                 'certificate_type': value.certificate_type
-            }
+            })
 
 
 class UserCredentialAttributeSerializer(serializers.ModelSerializer):
@@ -48,3 +49,4 @@ class UserCredentialSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = UserCredential
         include = ('credential', 'attributes', )
+        exclude = ('credential_content_type', 'credential_id')

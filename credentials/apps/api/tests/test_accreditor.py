@@ -1,6 +1,8 @@
 """
 Tests for Accreditor class.
 """
+from __future__ import unicode_literals
+
 from django.test import TestCase
 from mock import patch
 from testfixtures import LogCapture
@@ -30,7 +32,7 @@ class TestAccreditor(TestCase):
         self.slug = ProgramCertificateIssuer.issued_credential_type.credential_type_slug
 
     def test_create_credential_type_issuer_map(self):
-        """ Verify that credential_type_issuer_map unique credential type. """
+        """ Verify the Accreditor supports only one issuer per credential type. """
         accreditor = Accreditor(issuers=[ProgramCertificateIssuer(), ProgramCertificateIssuer()])
         self.assertEqual(
             accreditor.credential_type_issuer_map, {
@@ -39,24 +41,25 @@ class TestAccreditor(TestCase):
         )
 
     def test_issue_credential_with_invalid_type(self):
-        """ Verify that issue credential does not work with if credential type is invalid. """
+        """ Verify the method raises an error for attempts to issue an unsupported credential type. """
         with self.assertRaises(UnsupportedCredentialTypeError):
             __ = self.accreditor.issue_credential('dummy', 'tester', **self.data)
 
     def test_issue_credential_method(self):
-        """ Verify that issue_credential() called and issues credential."""
+        """ Verify the method calls the Issuer's issue_credential method. """
         with patch.object(ProgramCertificateIssuer, 'issue_credential') as mock_method:
             self.accreditor.issue_credential(self.program_content_type, 'tester', **self.data)
             mock_method.assert_called_with('tester', **self.data)
 
     def test_credential_with_duplicate_slug_type(self):
-        """ Verify that if duplicate slug types appear than warning will be
-        logged.
-        ."""
-        # Verify log is captured.
-        msg = 'Issuer slug type already exist [{type}].'.format(
-            type=ProgramCertificateIssuer.issued_credential_type.credential_type_slug
+        """ Verify a warning is logged for attempts to register multiple issuers
+        for the same credential type.
+        """
+        credential_type_slug = ProgramCertificateIssuer.issued_credential_type.credential_type_slug
+        msg = "The issuer [{}] is already registered to issue credentials of type [{}]. [{}] will NOT be used.".format(
+            ProgramCertificateIssuer, credential_type_slug, ProgramCertificateIssuer
         )
+
         with LogCapture(LOGGER_NAME) as l:
             # Pass duplicate issuers to capture the log.
             accreditor = Accreditor(issuers=[ProgramCertificateIssuer(), ProgramCertificateIssuer()])
