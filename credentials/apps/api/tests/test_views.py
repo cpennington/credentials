@@ -7,7 +7,7 @@ import json
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from mock import patch
-from rest_framework.test import APITestCase, APITransactionTestCase
+from rest_framework.test import APITransactionTestCase
 from testfixtures import LogCapture
 
 from credentials.apps.api.tests.mixin import AuthClientMixin
@@ -23,7 +23,7 @@ JSON_CONTENT_TYPE = 'application/json'
 LOGGER_NAME = 'credentials.apps.credentials.issuers'
 
 
-class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
+class TestGenerateProgramsCredentialView(AuthClientMixin):
     """ Tests for ProgramsCredentialView. """
 
     def setUp(self):

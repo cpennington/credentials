@@ -24,11 +24,14 @@ class Accreditor(object):
         """Creates a map from credential type slug to a list of credential issuers."""
         self.credential_type_issuer_map = {}
         for issuer in self.issuers:
-            slug_value = issuer.issued_credential_type.credential_type_slug
-            if slug_value not in self.credential_type_issuer_map:
-                self.credential_type_issuer_map[slug_value] = issuer
+            credential_type_slug = issuer.issued_credential_type.credential_type_slug
+            registered_issuer = self.credential_type_issuer_map.get(credential_type_slug)
+            if not registered_issuer:
+                self.credential_type_issuer_map[credential_type_slug] = issuer
             else:
-                logger.warning("Issuer slug type already exist [%s].", slug_value)
+                logger.warning(
+                    "The issuer [%s] is already registered to issue credentials of type [%s]. [%s] will NOT be used.",
+                    registered_issuer, credential_type_slug, issuer)
 
     def issue_credential(self, credential_type, username, **kwargs):
         """Issues a credential.
@@ -36,7 +39,7 @@ class Accreditor(object):
         Arguments:
             credential_type (string): Type of credential to be issued.
             username (string): Username of the recipient.
-            **kwargs: Arbitrary keyword arguments passed to the issuer class.
+            **kwargs (dict): Arbitrary keyword arguments passed to the issuer class.
 
         Returns:
             UserCredential
@@ -48,7 +51,7 @@ class Accreditor(object):
             credential_issuer = self.credential_type_issuer_map[credential_type]
         except KeyError:
             raise exceptions.UnsupportedCredentialTypeError(
-                "Credential type [{credential_type}] is not supported.".format(credential_type=credential_type)
+                "Unable to issue credential. No issuer is registered for credential type [{}]".format(credential_type)
             )
 
         return credential_issuer.issue_credential(username, **kwargs)

@@ -1,6 +1,7 @@
 """
 Factories for tests of credentials.
 """
+# pylint: disable=missing-docstring
 
 import uuid  # pylint: disable=unused-import
 import factory
@@ -11,8 +12,6 @@ from credentials.apps.credentials import constants
 from credentials.apps.credentials import models
 from credentials.settings.base import AUTH_USER_MODEL
 
-
-# pylint: disable=missing-docstring,unnecessary-lambda
 
 PASSWORD = 'dummy-password'
 

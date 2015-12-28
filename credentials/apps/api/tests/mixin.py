@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from credentials.apps.api.tests.factories import UserFactory
 
 
-class AuthClientMixin(object, APITestCase):
+class AuthClientMixin(APITestCase):
     """Mixin useful for getting APIClient objects in tests."""
 
     def get_api_client(self, permission_code=None):

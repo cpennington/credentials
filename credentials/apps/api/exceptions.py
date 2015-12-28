@@ -9,5 +9,5 @@ class UnsupportedCredentialTypeError(Exception):
 
 
 class InvalidCredentialIdError(Exception):
-    """ Raised when the credential id is invalid. """
+    """ Raised when the credential ID is invalid. """
     pass
