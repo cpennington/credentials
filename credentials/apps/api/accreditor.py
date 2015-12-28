@@ -54,4 +54,7 @@ class Accreditor(object):
                 "Unable to issue credential. No issuer is registered for credential type [{}]".format(credential_type)
             )
 
+        if credential_type == ProgramCertificateIssuer().issued_credential_type.credential_type_slug:
+            return credential_issuer.issue_credential(username, kwargs.get('program_id'), kwargs.get('attributes'))
+
         return credential_issuer.issue_credential(username, **kwargs)

@@ -83,21 +83,27 @@ class UserCredentialViewSet(viewsets.ModelViewSet):
         try:
             credential = request.data
             credential_type = None
-            cred_id = None
+            program_id = None
+            course_id = None
 
             if 'program_id' in credential:
                 credential_type = ProgramCertificate.credential_type_slug
-                cred_id = credential.get('program_id')
+                program_id = credential.get('program_id')
             elif 'course_id' in credential:
                 credential_type = CourseCertificate.credential_type_slug
-                cred_id = credential.get('course_id')
+                course_id = credential.get('course_id')
 
             if not credential_type:
                 raise exceptions.UnsupportedCredentialTypeError("Credential type is missing.")
 
-            if not isinstance(cred_id, int):
+            if program_id and not isinstance(program_id, int):
                 raise exceptions.InvalidCredentialIdError(
-                    "Credential Id [{cred_id}] is invalid.".format(cred_id=cred_id)
+                    "Program Id [{program_id}] is invalid.".format(program_id=program_id)
+                )
+
+            if course_id and not isinstance(course_id, str):
+                raise exceptions.InvalidCredentialIdError(
+                    "Course Id [{course_id}] is invalid.".format(course_id=course_id)
                 )
 
             if 'username' not in credential:

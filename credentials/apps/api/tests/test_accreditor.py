@@ -49,7 +49,11 @@ class TestAccreditor(TestCase):
         """ Verify the method calls the Issuer's issue_credential method. """
         with patch.object(ProgramCertificateIssuer, 'issue_credential') as mock_method:
             self.accreditor.issue_credential(self.program_content_type, 'tester', **self.data)
-            mock_method.assert_called_with('tester', **self.data)
+            mock_method.assert_called_with(
+                'tester',
+                self.data.get("program_id"),
+                self.data.get("attributes"),
+            )
 
     def test_credential_with_duplicate_slug_type(self):
         """ Verify a warning is logged for attempts to register multiple issuers

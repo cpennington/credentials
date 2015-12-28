@@ -56,9 +56,7 @@ class ProgramCertificateIssuer(AbstractCredentialIssuer):
     issued_credential_type = ProgramCertificate
 
     @transaction.atomic
-    def issue_credential(self, username, **kwargs):
-        program_id = kwargs['program_id']
-        attributes = kwargs['attributes']
+    def issue_credential(self, username, program_id, attributes):
 
         program_certificate = ProgramCertificate.objects.get(program_id=program_id)
 

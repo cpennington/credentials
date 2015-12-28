@@ -242,7 +242,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
 
         data = {
             "username": "user1",
-            "program_id": "0000",
+            "program_id": "abc",
             "attributes": [
                 {
                     "namespace": self.attr.namespace,
@@ -254,7 +254,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
 
         response = self._attempt_create_user_credentials(data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(json.loads(response.content), {"error": "Credential Id [0000] is invalid."})
+        self.assertEqual(json.loads(response.content), {"error": "Program Id [abc] is invalid."})
 
     def test_create_with_invalid_program_id(self):
         """ Verify that create endpoint returns error on invalid program id. """
