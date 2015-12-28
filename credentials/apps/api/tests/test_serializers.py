@@ -50,7 +50,7 @@ class CredentialSerializerTests(TestCase):
             "created": self.program_credential.created.strftime(DRF_DATE_FORMAT),
             "modified": self.program_credential.modified.strftime(DRF_DATE_FORMAT)
         }
-        self.assertDictEqual(serialize_data.data, expected)
+        self.assertEqual(serialize_data.data, expected)
 
     def test_usercredentialserializer_for_course(self):
         """ Verify that UserCredentialSerializer serialize data correctly of course type."""
@@ -77,7 +77,7 @@ class CredentialSerializerTests(TestCase):
             "created": self.course_credential.created.strftime(DRF_DATE_FORMAT),
             "modified": self.course_credential.modified.strftime(DRF_DATE_FORMAT)
         }
-        self.assertDictEqual(serialize_data.data, expected)
+        self.assertEqual(serialize_data.data, expected)
 
     def test_usercredentialattributeserializer(self):
         """ Verify that user CredentialAttributeSerializer serialize data correctly."""
@@ -88,69 +88,4 @@ class CredentialSerializerTests(TestCase):
             "value": self.program_cert_attr.value
         }
 
-        self.assertDictEqual(serialize_data.data, expected)
-
-    def test_coursecertificateserializer(self):
-        """ Verify that CourseCertificateSerializer serialize data correctly for
-        course certificates.
-        """
-        serialize_data = serializers.CourseCertificateSerializer(self.course_cert)
-
-        expected = {
-            "user_credential": [
-                {
-                    "username": self.course_credential.username,
-                    "uuid": str(self.course_credential.uuid),
-                    "credential": {
-                        "course_id": self.course_cert.course_id,
-                        "certificate_type": self.course_cert.certificate_type,
-                        "credential_id": self.course_cert.id
-                    },
-                    "download_url": self.course_credential.download_url,
-                    "status": self.course_credential.status,
-                    "attributes": [
-                        {
-                            "namespace": self.course_cert_attr.namespace,
-                            "name": self.course_cert_attr.name,
-                            "value": self.course_cert_attr.value
-                        }
-                    ],
-                    "id": self.course_credential.id,
-                    "created": self.course_credential.created.strftime(DRF_DATE_FORMAT),
-                    "modified": self.course_credential.modified.strftime(DRF_DATE_FORMAT)
-                }
-            ],
-            "course_id": self.course_cert.course_id,
-            "certificate_type": self.course_cert.certificate_type
-        }
-        self.assertDictEqual(serialize_data.data, expected)
-
-    def test_programcertificateserializer(self):
-        """ Verify that ProgramCertificateSerializer serialize data correctly."""
-        serialize_data = serializers.ProgramCertificateSerializer(self.program_cert)
-        expected = {
-            "program_id": self.program_cert.program_id,
-            "user_credential": [
-                {
-                    "id": self.program_credential.id,
-                    "username": self.program_credential.username,
-                    "credential": {
-                        "program_id": self.program_cert.program_id,
-                        "credential_id": self.program_cert.id,
-                    },
-                    "status": self.program_credential.status,
-                    "download_url": self.program_credential.download_url,
-                    "uuid": str(self.program_credential.uuid),
-                    "attributes": [
-                        {
-                            "namespace": self.program_cert_attr.namespace,
-                            "name": self.program_cert_attr.name,
-                            "value": self.program_cert_attr.value
-                        }
-                    ],
-                    "created": self.program_credential.created.strftime(DRF_DATE_FORMAT),
-                    "modified": self.program_credential.modified.strftime(DRF_DATE_FORMAT)
-                }
-            ]
-        }
-        self.assertDictEqual(serialize_data.data, expected)
+        self.assertEqual(serialize_data.data, expected)

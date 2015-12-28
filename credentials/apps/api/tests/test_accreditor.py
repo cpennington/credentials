@@ -32,7 +32,7 @@ class TestAccreditor(TestCase):
     def test_create_credential_type_issuer_map(self):
         """ Verify that credential_type_issuer_map unique credential type. """
         accreditor = Accreditor(issuers=[ProgramCertificateIssuer(), ProgramCertificateIssuer()])
-        self.assertDictEqual(
+        self.assertEqual(
             accreditor.credential_type_issuer_map, {
                 self.slug: accreditor.issuers[0]
             }
@@ -61,7 +61,7 @@ class TestAccreditor(TestCase):
             # Pass duplicate issuers to capture the log.
             accreditor = Accreditor(issuers=[ProgramCertificateIssuer(), ProgramCertificateIssuer()])
             l.check((LOGGER_NAME, 'WARNING', msg))
-            self.assertDictEqual(
+            self.assertEqual(
                 accreditor.credential_type_issuer_map, {
                     self.slug: accreditor.issuers[0]
                 }

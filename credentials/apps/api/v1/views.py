@@ -12,8 +12,7 @@ from rest_framework import filters
 from credentials.apps.api import exceptions
 from credentials.apps.api.accreditor import Accreditor
 from credentials.apps.api.serializers import (
-    UserCredentialSerializer, ProgramCertificateSerializer,
-    CourseCertificateSerializer
+    UserCredentialSerializer,
 )
 from credentials.apps.credentials.models import (
     UserCredential, ProgramCertificate, CourseCertificate
@@ -43,26 +42,19 @@ class UserCredentialViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
-        PATCH # /v1/user_credentials/{username}/
+        PATCH # /v1/user_credentials/{credential_id}/
         Only to update the certificate status.
         {
             "id": 1,
-            "username": "tester",
-            "credential": {
-                "program_id": 1001
-            },
             "status": "revoked",
-            "download_url": "",
-            "uuid": "2a2f5562-b876-44c8-b16e-f62ea3a1a2e6",
-            "attributes": []
         }
         """
         # if id exists in db then return the object otherwise return 404
         credential = generics.get_object_or_404(UserCredential, pk=request.data.get('id'))
         credential.status = request.data.get('status')
-        if not credential.status:
+        if not credential.status or credential.status not in ['revoked', 'awarded']:
             return Response({
-                'error': 'Only status of credential is allowed to update'
+                'error': 'Must supply a new credential status.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         credential.save()
@@ -121,17 +113,3 @@ class UserCredentialViewSet(viewsets.ModelViewSet):
         except Exception as ex:  # pylint: disable=broad-except
             return Response({'error': ex.message},
                             status=status.HTTP_400_BAD_REQUEST)
-
-
-class CredentialsByProgramsViewSet(viewsets.ModelViewSet):
-    """It will return the all credentials for programs."""
-    queryset = ProgramCertificate.objects.all()
-    serializer_class = ProgramCertificateSerializer
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
-
-
-class CredentialsByCoursesViewSet(viewsets.ModelViewSet):
-    """It will return the all credentials for courses."""
-    queryset = CourseCertificate.objects.all()
-    serializer_class = CourseCertificateSerializer
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)

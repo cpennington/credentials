@@ -31,7 +31,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         super(TestGenerateProgramsCredentialView, self).setUp()
 
         # api client with no permissions
-        self.client = self.get_api_client(permission_code=None)
+        self.client = self.get_api_client(self.client, permission_code=None)
 
         # create credentials for user
         self.program_cert = ProgramCertificateFactory.create()
@@ -82,7 +82,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
           Response: HTTP response from the API.
         """
         # get client with user has permission to change user credential
-        client = self.get_api_client(permission_code="change_usercredential")
+        client = self.get_api_client(self.client, permission_code="change_usercredential")
         path = reverse("credentials:v1:usercredential-detail", args=[self.user_credential.id])
         return client.patch(path=path, data=json.dumps(data), content_type=JSON_CONTENT_TYPE)
 
@@ -92,7 +92,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         path = reverse("credentials:v1:usercredential-detail", args=[self.user_credential.id])
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(
+        self.assertEqual(
             json.loads(response.content),
             self._create_output_data(self.user_credential, self.program_cert)
         )
@@ -123,9 +123,9 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         }
         response = self._attempt_update_user_credential(data)
 
-        self.assertDictEqual(
+        self.assertEqual(
             json.loads(response.content),
-            {'error': 'Only status of credential is allowed to update'}
+            {'error': 'Must supply a new credential status.'}
         )
 
     def test_permissions_for_patch(self):
@@ -152,7 +152,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
           Response: HTTP response from the API.
         """
         # get client with user has permission to add user credential
-        client = self.get_api_client(permission_code="add_usercredential")
+        client = self.get_api_client(self.client, permission_code="add_usercredential")
         path = reverse("credentials:v1:usercredential-list")
         return client.post(path=path, data=json.dumps(data), content_type=JSON_CONTENT_TYPE)
 
@@ -176,7 +176,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         self.assertEqual(response.status_code, 200)
         users_creds = UserCredential.objects.filter(username=username)
         expected_data = self._create_output_data(users_creds[0], program_2)
-        self.assertDictEqual(json.loads(response.content), expected_data)
+        self.assertEqual(json.loads(response.content), expected_data)
 
     def test_permissions_for_create(self):
         """ Verify that the create endpoint of user credential does not allow
@@ -359,7 +359,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         self.assertEqual(response.status_code, 200)
 
         user_cred_1 = UserCredential.objects.get(username=username)
-        self.assertDictEqual(
+        self.assertEqual(
             json.loads(response.content),
             self._create_output_data(user_cred_1, self.program_cert)
         )
@@ -394,7 +394,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
             self.assertEqual(response.status_code, 200)
 
         expected_json = self._create_output_data(self.user_credential, self.program_cert)
-        self.assertDictEqual(
+        self.assertEqual(
             json.loads(response.content),
             {'count': 1, 'next': None, 'previous': None, 'results': [expected_json]}
         )
@@ -415,7 +415,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
         response = self.client.get(path)
 
         expected_json = self._create_output_data(self.user_credential, self.program_cert)
-        self.assertDictEqual(
+        self.assertEqual(
             json.loads(response.content),
             {'count': 1, 'next': None, 'previous': None, 'results': [expected_json]}
         )
@@ -441,7 +441,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
                 }
             ]
         }
-        client = self.get_api_client(permission_code="add_usercredential")
+        client = self.get_api_client(self.client, permission_code="add_usercredential")
 
         with self.assertNumQueries(12):
             path = reverse("credentials:v1:usercredential-list")
@@ -449,7 +449,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin, APITestCase):
 
         users_creds = UserCredential.objects.filter(username=username)
         expected_data = self._create_output_data(users_creds[0], program_2)
-        self.assertDictEqual(json.loads(response.content), expected_data)
+        self.assertEqual(json.loads(response.content), expected_data)
 
 
 class TestAPITransactions(AuthClientMixin, APITransactionTestCase):
@@ -504,7 +504,7 @@ class TestProgramsView(AuthClientMixin, APITestCase):
         super(TestProgramsView, self).setUp()
 
         # api client with no permissions
-        self.client = self.get_api_client(permission_code=None)
+        self.client = self.get_api_client(self.client, permission_code=None)
 
         # create credentials for user
         self.program_cre = ProgramCertificateFactory.create()
@@ -537,7 +537,7 @@ class TestProgramsView(AuthClientMixin, APITestCase):
         ]
 
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertEqual(json.loads(response.content), expected)
 
 
 class TestCourseView(AuthClientMixin, APITestCase):
@@ -547,7 +547,7 @@ class TestCourseView(AuthClientMixin, APITestCase):
         super(TestCourseView, self).setUp()
 
         # api client with no permissions
-        self.client = self.get_api_client(permission_code=None)
+        self.client = self.get_api_client(self.client, permission_code=None)
 
         # create credentials for user
         self.course_cre = CourseCertificateFactory.create()
@@ -582,4 +582,4 @@ class TestCourseView(AuthClientMixin, APITestCase):
         ]
 
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertEqual(json.loads(response.content), expected)

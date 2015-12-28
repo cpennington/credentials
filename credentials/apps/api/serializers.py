@@ -47,34 +47,4 @@ class UserCredentialSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = UserCredential
-        fields = (
-            'id', 'username', 'credential',
-            'status', 'download_url', 'uuid', 'attributes', 'created', 'modified'
-        )
-
-
-class ProgramCertificateSerializer(serializers.ModelSerializer):
-    """ Serializer for ProgramCertificate objects. """
-    user_credential = serializers.SerializerMethodField("get_user_credentials")
-
-    class Meta(object):
-        model = ProgramCertificate
-        fields = ('user_credential', 'program_id')
-
-    def get_user_credentials(self, program):
-        """ Returns all user credentials for a given program."""
-        return UserCredentialSerializer(program.user_credentials.all(), many=True).data
-
-
-class CourseCertificateSerializer(serializers.ModelSerializer):
-    """ Serializer for CourseCertificate objects. """
-
-    user_credential = serializers.SerializerMethodField("get_user_credentials")
-
-    class Meta(object):
-        model = CourseCertificate
-        fields = ('user_credential', 'course_id', 'certificate_type',)
-
-    def get_user_credentials(self, course):
-        """ Returns all user credentials for a given program."""
-        return UserCredentialSerializer(course.user_credentials.all(), many=True).data
+        include = ('credential', 'attributes', )
