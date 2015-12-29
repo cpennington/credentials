@@ -2,22 +2,22 @@
 Tests for credentials service views.
 """
 from __future__ import unicode_literals
+
 import json
 
-from django.db import IntegrityError
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from mock import patch
 from rest_framework.test import APITransactionTestCase
 from testfixtures import LogCapture
 
-from credentials.apps.api.tests.mixin import AuthClientMixin
+from credentials.apps.api.serializers import UserCredentialSerializer
 from credentials.apps.api.tests.factories import (
-    CourseCertificateFactory, ProgramCertificateFactory,
-    UserCredentialFactory, UserCredentialAttributeFactory,
+    ProgramCertificateFactory, UserCredentialFactory, UserCredentialAttributeFactory,
     UserFactory)
+from credentials.apps.api.tests.mixin import AuthClientMixin
 from credentials.apps.credentials.constants import DRF_DATE_FORMAT
 from credentials.apps.credentials.models import UserCredential, UserCredentialAttribute
-
 
 JSON_CONTENT_TYPE = 'application/json'
 LOGGER_NAME = 'credentials.apps.credentials.issuers'
@@ -125,7 +125,7 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
         response = self._attempt_update_user_credential(data)
 
         self.assertEqual(
-            json.loads(response.content),
+            response.data,
             {'error': 'Must supply a new credential status.'}
         )
 
@@ -160,11 +160,14 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
     def test_create_user_credential_for_program(self):
         """ Verify the endpoint supports the creation of new user credential for program. """
 
-        program_2 = ProgramCertificateFactory.create(program_id=100)
+        program_certificate = ProgramCertificateFactory()
         username = 'user2'
         data = {
             "username": username,
-            "program_id": program_2.program_id,
+            # NOTE (CCB): This mirrors how the data is serialized for reads.
+            "credential": {
+                "program_id": program_certificate.program_id,
+            },
             "attributes": [
                 {
                     "namespace": self.attr.namespace,
@@ -174,10 +177,10 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
             ]
         }
         response = self._attempt_create_user_credentials(data)
-        self.assertEqual(response.status_code, 200)
-        users_creds = UserCredential.objects.filter(username=username)
-        expected_data = self._create_output_data(users_creds[0], program_2)
-        self.assertEqual(json.loads(response.content), expected_data)
+        self.assertEqual(response.status_code, 201)
+
+        user_credential = UserCredential.objects.latest()
+        self.assertEqual(response.data, UserCredentialSerializer(user_credential).data)
 
     def test_permissions_for_create(self):
         """ Verify that the create endpoint of user credential does not allow
@@ -187,7 +190,9 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
         username = 'user2'
         data = {
             "username": username,
-            "program_id": self.program_id,
+            "credential": {
+                "program_id": self.program_id,
+            },
             "attributes": [
             ]
         }
@@ -196,30 +201,8 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_create_user_credential_for_course(self):
-        """ Verify the endpoint doest not support creation of new user credential
-        for course as we don't have issuer implemented for course certificate.
-        """
-
-        course_cert = CourseCertificateFactory.create(course_id='dummy-id')
-        username = 'user2'
-        data = {
-            "username": username,
-            "course_id": course_cert.course_id,
-            "attributes": [
-                {
-                    "namespace": self.attr.namespace,
-                    "name": self.attr.name,
-                    "value": self.attr.value
-                }
-            ]
-        }
-        response = self._attempt_create_user_credentials(data)
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(UserCredential.objects.filter(username=username).exists())
-
-    def test_without_program_id(self):
-        """ Verify that create endpoint return 400-Bad Request with program_id. """
+    def test_without_credential_field(self):
+        """ Verify a credential . """
         data = {
             "username": "user1",
             "attributes": [
@@ -301,7 +284,9 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
         username = 'test_user'
         data = {
             "username": username,
-            "program_id": self.program_id,
+            "credential": {
+                "program_id": self.program_id,
+            },
             "attributes": [
                 {
                     "namespace": "white",
@@ -420,37 +405,6 @@ class TestGenerateProgramsCredentialView(AuthClientMixin):
             json.loads(response.content),
             {'count': 1, 'next': None, 'previous': None, 'results': [expected_json]}
         )
-
-    def test_create_method_queries(self):
-        """ Verify the number of queries during the create credential. """
-
-        program_2 = ProgramCertificateFactory.create(program_id=100)
-        username = 'user2'
-        data = {
-            "username": username,
-            "program_id": program_2.program_id,
-            "attributes": [
-                {
-                    "namespace": self.attr.namespace,
-                    "name": self.attr.name,
-                    "value": self.attr.value
-                },
-                {
-                    "namespace": 'second',
-                    "name": 'testing',
-                    "value": '10'
-                }
-            ]
-        }
-        client = self.get_api_client(self.user, permission_code="add_usercredential")
-
-        with self.assertNumQueries(12):
-            path = reverse("credentials:v1:usercredential-list")
-            response = client.post(path=path, data=json.dumps(data), content_type=JSON_CONTENT_TYPE)
-
-        users_creds = UserCredential.objects.filter(username=username)
-        expected_data = self._create_output_data(users_creds[0], program_2)
-        self.assertEqual(json.loads(response.content), expected_data)
 
     def test_with_invalid_course_id(self):
         """ Verify that create endpoint returns 400-Bad Request if course-id is not a valid

@@ -3,6 +3,7 @@ Models for the credentials service.
 """
 # pylint: disable=model-missing-unicode
 from __future__ import unicode_literals
+
 import abc
 import os
 import uuid  # pylint: disable=unused-import
@@ -25,7 +26,7 @@ def _choices(*values):
     """
     Helper for use with model field 'choices'.
     """
-    return [(value, ) * 2 for value in values]
+    return [(value,) * 2 for value in values]
 
 
 def template_assets_path(instance, filename):
@@ -203,9 +204,7 @@ class UserCredential(TimeStampedModel):
     """
     Credentials issued to a learner.
     """
-    AWARDED, REVOKED = (
-        'awarded', 'revoked',
-    )
+    AWARDED, REVOKED = ('awarded', 'revoked',)
 
     STATUSES_CHOICES = (
         (AWARDED, _('awarded')),
@@ -233,7 +232,7 @@ class UserCredential(TimeStampedModel):
     )
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
-    class Meta(object):
+    class Meta(TimeStampedModel.Meta):
         unique_together = (('username', 'credential_content_type', 'credential_id'),)
 
 
@@ -298,10 +297,7 @@ class CertificateTemplateAsset(TimeStampedModel):
     asset_file = models.FileField(upload_to=template_assets_path)
 
     def __unicode__(self):
-        """Unicode representation. """
-        return '{name}'.format(
-            name=self.name
-        )
+        return self.name
 
     # pylint: disable=no-member
     def save(self, *args, **kwargs):
