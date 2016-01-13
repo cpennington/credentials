@@ -193,7 +193,7 @@ class OrganizationsDataMixin(object):
         self.assertTrue(httpretty.is_enabled(), msg='httpretty must be enabled to mock Organizations API calls.')
 
         organizations_api_url = settings.ORGANIZATIONS_API_URL
-        url = organizations_api_url.strip('/') + '/organization/{}/'.format(organization_key)
+        url = organizations_api_url.strip('/') + '/organization/' + organization_key + '/'
 
         # only return data for test org
         if organization_key == 'test-org':
@@ -240,7 +240,7 @@ class UserDataMixin(object):
         self.assertTrue(httpretty.is_enabled(), msg='httpretty must be enabled to mock User API calls.')
 
         user_api_url = settings.USER_API_URL
-        url = user_api_url.strip('/') + '/accounts/{}'.format(username)
+        url = user_api_url.strip('/') + '/accounts/' + username
 
         # only return data for test user
         if username == 'test-user':

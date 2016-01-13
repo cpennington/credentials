@@ -312,8 +312,7 @@ class TestUserRetrieval(UserDataMixin, TestCase):
         'USER_JWT_SECRET_KEY',
     )
     def test_get_user_client_settings_failure(self, setting_attribute):
-        """
-        Verify the behavior when API client fails to initialize due to
+        """ Verify the behavior when API client fails to initialize due to
         missing settings.
         """
         self.mock_user_api(self.username)

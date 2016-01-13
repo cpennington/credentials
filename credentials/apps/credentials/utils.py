@@ -207,6 +207,7 @@ def get_user_api_client():
                       "'USER_JWT_SECRET_KEY' are provided.")
         return None
 
+    # user api don't accept url with trailing slash so make `append_slash` False
     return _get_service_user_api_client(user_api_url, service_username, jwt_audience, jwt_secret_key, False)
 
 
