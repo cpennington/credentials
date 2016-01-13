@@ -15,6 +15,9 @@ LOGGING = get_logger_config()
 # AMAZON S3 STORAGE CONFIGURATION
 # See: https://django-storages.readthedocs.org/en/latest/backends/amazon-S3.html#settings
 
+SOCIAL_AUTH_EDX_OIDC_KEY = 'credentials-key'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'credentials-secret'
+
 CONFIG_FILE = get_env_setting('CREDENTIALS_CFG')
 with open(CONFIG_FILE) as f:
     config_from_yaml = yaml.load(f)

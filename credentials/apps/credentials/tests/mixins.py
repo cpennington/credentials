@@ -177,3 +177,79 @@ class ProgramsDataMixin(object):
 
         httpretty.reset()
         httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json', status=status_code)
+
+
+class OrganizationsDataMixin(object):
+    """ Mixin mocking Organizations API URLs and providing fake data for testing."""
+    ORGANIZATIONS_API_RESPONSE = {
+        'name': 'Test Organization',
+        'short_name': 'test-org',
+        'description': 'Oraganization for testing.',
+        'logo': 'http://testserver/media/organization_logos/test_org_logo.png',
+    }
+
+    def mock_organizations_api(self, organization_key, status_code=200):
+        """ Utility for mocking out Organizations API URLs."""
+        self.assertTrue(httpretty.is_enabled(), msg='httpretty must be enabled to mock Organizations API calls.')
+
+        organizations_api_url = settings.ORGANIZATIONS_API_URL
+        url = organizations_api_url.strip('/') + '/organization/{}/'.format(organization_key)
+
+        # only return data for test org
+        if organization_key == 'test-org':
+            data = self.ORGANIZATIONS_API_RESPONSE
+        else:
+            data = None
+            status_code = 404
+
+        body = json.dumps(data)
+
+        httpretty.reset()
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json', status=status_code)
+
+
+class UserDataMixin(object):
+    """ Mixin mocking User API URLs and providing fake data for testing."""
+    USER_API_RESPONSE = {
+        "username": "test-user",
+        "bio": "A test user.",
+        "requires_parental_consent": False,
+        "name": "Test User",
+        "country": None,
+        "is_active": True,
+        "profile_image": {
+            "image_url_full": "http://localhost:8000/static/images/profiles/default_500.png",
+            "image_url_large": "http://localhost:8000/static/images/profiles/default_120.png",
+            "image_url_medium": "http://localhost:8000/static/images/profiles/default_50.png",
+            "image_url_small": "http://localhost:8000/static/images/profiles/default_30.png",
+            "has_image": False
+        },
+        "year_of_birth": None,
+        "level_of_education": None,
+        "goals": None,
+        "language_proficiencies": [],
+        "gender": None,
+        "account_privacy": "private",
+        "mailing_address": None,
+        "email": "test@example.org",
+        "date_joined": "2015-11-17T03:16:01Z"
+    }
+
+    def mock_user_api(self, username, status_code=200):
+        """ Utility for mocking out User API URLs."""
+        self.assertTrue(httpretty.is_enabled(), msg='httpretty must be enabled to mock User API calls.')
+
+        user_api_url = settings.USER_API_URL
+        url = user_api_url.strip('/') + '/accounts/{}'.format(username)
+
+        # only return data for test user
+        if username == 'test-user':
+            data = self.USER_API_RESPONSE
+        else:
+            data = None
+            status_code = 404
+
+        body = json.dumps(data)
+
+        httpretty.reset()
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json', status=status_code)
